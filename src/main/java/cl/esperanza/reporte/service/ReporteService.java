@@ -1,30 +1,31 @@
 package cl.esperanza.reporte.service;
 
+import java.time.LocalDate;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+
 import cl.esperanza.reporte.dto.CreateReporteRequest;
 import cl.esperanza.reporte.model.Reporte;
 import cl.esperanza.reporte.repository.ReporteRepository;
 import jakarta.transaction.Transactional;
-import java.time.LocalDate;
 
 @Service
 @Transactional
 public class ReporteService {
     
-    private final ReporteRepository reporteRepo;
-    private final WebClient pagoWebClient;
-    private final WebClient facturacionWebClient;
-    private final WebClient reparacionWebClient;
+    @Autowired
+    private ReporteRepository reporteRepo;
 
-    // Inyección por constructor de dependencias y WebClients
-    public ReporteService(ReporteRepository reporteRepo, WebClient pagoWebClient, 
-                          WebClient facturacionWebClient, WebClient reparacionWebClient) {
-        this.reporteRepo = reporteRepo;
-        this.pagoWebClient = pagoWebClient;
-        this.facturacionWebClient = facturacionWebClient;
-        this.reparacionWebClient = reparacionWebClient;
-    }
+    @Autowired
+    private WebClient pagoWebClient;
+
+    @Autowired
+    private WebClient facturacionWebClient;
+
+    @Autowired
+    private WebClient reparacionWebClient;
 
     public Reporte generarYGuardarBalanceTrimestral(CreateReporteRequest request) {
         try {
