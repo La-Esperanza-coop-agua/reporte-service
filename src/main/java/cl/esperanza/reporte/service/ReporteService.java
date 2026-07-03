@@ -29,32 +29,37 @@ public class ReporteService {
 
     public Reporte generarYGuardarBalanceTrimestral(CreateReporteRequest request) {
         try {
-            // 1. Obtener Ingresos desde pago-service (8084)
-            Double ingresos = pagoWebClient.get()
+            Double totalIngresos = 0.0;
+            Double totalEgresos = 0.0;
+
+            try {
+                // Usando 'pagoWebClient' en singular como lo tienes declarado
+                totalIngresos = pagoWebClient.get()
                     .uri("/total-recaudado")
                     .retrieve()
                     .bodyToMono(Double.class)
+                    .defaultIfEmpty(0.0) 
                     .block();
+            } catch (Exception e) {
+                System.err.println("No se pudo conectar con Pagos, usando 0.0: " + e.getMessage());
+            }
 
-            // 2. Obtener Egresos Operacionales desde facturacion-service (8083)
-            Integer egresosOps = facturacionWebClient.get()
-                    .uri("/gasto/total-monto")
-                    .retrieve()
-                    .bodyToMono(Integer.class)
-                    .block();
-
-            // 3. Obtener Egresos Técnicos desde reparacion-service (8081)
-            Double egresosTec = reparacionWebClient.get()
+            try {
+                totalEgresos = reparacionWebClient.get()
                     .uri("/total-costos")
                     .retrieve()
                     .bodyToMono(Double.class)
-                    .onErrorReturn(0.0) // Resguardo por si reparaciones no está arriba todavía
+                    .defaultIfEmpty(0.0) 
                     .block();
+            } catch (Exception e) {
+                System.err.println("No se pudo conectar con Reparaciones, usando 0.0: " + e.getMessage());
+            }
 
-            // Sanitizar nulos procedentes de la red
-            double totalIngresos = (ingresos != null) ? ingresos : 0.0;
-            double totalEgresos = ((egresosOps != null) ? egresosOps : 0.0) + ((egresosTec != null) ? egresosTec : 0.0);
+            if (totalIngresos == null) totalIngresos = 0.0;
+            if (totalEgresos == null) totalEgresos = 0.0;
 
+
+            double balanceFinal = totalIngresos - totalEgresos;
             // 4. Instanciar el objeto Reporte mapeando los datos desde el DTO
             Reporte nuevoReporte = new Reporte();
             nuevoReporte.setFechaGeneracion(LocalDate.now());
