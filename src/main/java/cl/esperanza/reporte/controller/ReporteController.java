@@ -24,8 +24,7 @@ public class ReporteController {
         this.reporteService = reporteService;
     }
 
-    @Operation(summary = "Generar un nuevo balance trimestral", 
-                description = "Calcula ingresos, egresos y evalúa si califica para postulaciones.")
+    @Operation(summary = "Generar un nuevo balance trimestral", description = "Calcula ingresos, egresos y evalúa si califica para postulaciones.")
     @ApiResponses(value = {
         @ApiResponse(responseCode = "201", description = "Balance generado exitosamente"),
         @ApiResponse(responseCode = "400", description = "Error de validación en los datos enviados"),
